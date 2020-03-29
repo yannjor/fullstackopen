@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import axios from 'axios';
 import Countries from './Countries';
+import './App.css';
 
 const CountriesSearch = ({ setFilter }) => {
   return (
@@ -20,14 +21,12 @@ const App = () => {
 
   useEffect(() => {
     axios.get('https://restcountries.eu/rest/v2/all').then(res => {
-      console.log(res.data);
       setCountries(res.data);
     });
   }, []);
 
 
   const handleShowCountry = (event) => {
-    console.log(event.target.value);
     setFilter(event.target.value);
   };
 
