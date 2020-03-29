@@ -25,12 +25,20 @@ const App = () => {
     });
   }, []);
 
+
+  const handleShowCountry = (event) => {
+    console.log(event.target.value);
+    setFilter(event.target.value);
+  };
+
+
   return (
     <>
       <CountriesSearch setFilter={setFilter} />
       <Countries
         countries={countries}
         filter={filter}
+        handleShowCountry={handleShowCountry}
       />
     </>
   );
