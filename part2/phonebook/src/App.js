@@ -12,9 +12,10 @@ const App = () => {
   const [newNumber, setNewNumber] = useState('');
   const [filter, setFilter] = useState('');
 
+  const db_url = 'http://localhost:3001/persons';
 
   useEffect(() => {
-    axios.get('http://localhost:3001/persons').then(res => {
+    axios.get(db_url).then(res => {
       setPersons(res.data);
     });
   }, []);
@@ -24,12 +25,38 @@ const App = () => {
   const addPerson = (event) => {
     event.preventDefault();
     if (persons.some(person => person.name === newName)) {
-      alert(`${newName} is already in the phonebook`);
+      if (window.confirm(`${newName} is already added to the phonebook, replace the old number with a new one?`)) {
+        const person = persons.find(p => p.name === newName);
+        const changedPerson = { ...person, number: newNumber };
+        axios
+          .put(db_url.concat(`/${person.id}`), changedPerson)
+          .then(res => {
+            setPersons(persons.map(p => p.id === person.id ? res.data : p));
+            setNewName('');
+            setNewNumber('');
+          });
+      }
     } else {
-      setPersons(persons.concat({ name: newName, number: newNumber }));
+      const newPerson = { name: newName, number: newNumber };
+      axios
+        .post(db_url, newPerson)
+        .then(res => {
+          setPersons(persons.concat(newPerson));
+          setNewName('');
+          setNewNumber('');
+        });
     }
-    setNewName('');
-    setNewNumber('');
+  };
+
+
+  const deletePerson = (person) => {
+    if (window.confirm(`Delete ${person.name}?`)) {
+      axios
+        .delete(db_url.concat(`/${person.id}`))
+        .then(res => {
+          setPersons(persons.filter(p => p.id !== person.id));
+        });
+    }
   };
 
 
@@ -40,7 +67,11 @@ const App = () => {
       <AddPersonForm addPerson={addPerson} newName={newName} newNumber={newNumber}
         setNewName={setNewName} setNewNumber={setNewNumber} />
       <h2>Numbers</h2>
-      <Persons persons={persons} filter={filter} />
+      <Persons
+        persons={persons}
+        filter={filter}
+        deletePerson={deletePerson}
+      />
     </>
   );
 };
