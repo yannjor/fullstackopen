@@ -11,6 +11,7 @@ const App = () => {
   const [newName, setNewName] = useState('');
   const [newNumber, setNewNumber] = useState('');
   const [filter, setFilter] = useState('');
+  const [notificationMsg, setNotificationMsg] = useState(null);
 
   const db_url = 'http://localhost:3001/persons';
 
@@ -34,6 +35,10 @@ const App = () => {
             setPersons(persons.map(p => p.id === person.id ? res.data : p));
             setNewName('');
             setNewNumber('');
+            setNotificationMsg(`Added ${newName}`);
+            setTimeout(() => {
+              setNotificationMsg(null);
+            }, 3000);
           });
       }
     } else {
