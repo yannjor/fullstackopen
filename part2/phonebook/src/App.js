@@ -3,6 +3,7 @@ import axios from 'axios';
 import AddPersonForm from './AddPersonForm';
 import Persons from './Persons';
 import SearchFilter from './SearchFilter';
+import Notification from './Notification';
 
 
 
@@ -12,8 +13,18 @@ const App = () => {
   const [newNumber, setNewNumber] = useState('');
   const [filter, setFilter] = useState('');
   const [notificationMsg, setNotificationMsg] = useState(null);
+  const [error, setError] = useState(false);
 
   const db_url = 'http://localhost:3001/persons';
+
+
+  const timeout = () => {
+    setTimeout(() => {
+      setNotificationMsg(null);
+      setError(false);
+    }, 5000);
+  };
+
 
   useEffect(() => {
     axios.get(db_url).then(res => {
@@ -35,20 +46,31 @@ const App = () => {
             setPersons(persons.map(p => p.id === person.id ? res.data : p));
             setNewName('');
             setNewNumber('');
-            setNotificationMsg(`Added ${newName}`);
-            setTimeout(() => {
-              setNotificationMsg(null);
-            }, 3000);
+            setNotificationMsg(`Updated number for ${newName}`);
+            timeout();
+          })
+          .catch(err => {
+            console.log(err.response.data);
+            setError(true);
+            setNotificationMsg(`Information of ${newName} has already been removed from server`);
+            timeout();
           });
       }
     } else {
-      const newPerson = { name: newName, number: newNumber };
+      const newPerson = { name: newName, number: newNumber, id: persons.length + 1 };
       axios
         .post(db_url, newPerson)
         .then(res => {
           setPersons(persons.concat(newPerson));
           setNewName('');
           setNewNumber('');
+          setNotificationMsg(`Added ${newName}`);
+          timeout();
+        })
+        .catch(err => {
+          console.log(err.response.data);
+          setError(true);
+          setNotificationMsg('');
         });
     }
   };
@@ -60,6 +82,8 @@ const App = () => {
         .delete(db_url.concat(`/${person.id}`))
         .then(res => {
           setPersons(persons.filter(p => p.id !== person.id));
+          setNotificationMsg(`Deleted ${person.name}`);
+          timeout();
         });
     }
   };
@@ -68,6 +92,7 @@ const App = () => {
   return (
     <>
       <h1>Phonebook</h1>
+      <Notification message={notificationMsg} error={error} />
       <SearchFilter filter={filter} setFilter={setFilter} />
       <AddPersonForm addPerson={addPerson} newName={newName} newNumber={newNumber}
         setNewName={setNewName} setNewNumber={setNewNumber} />
