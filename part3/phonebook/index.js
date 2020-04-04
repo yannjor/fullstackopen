@@ -1,7 +1,15 @@
 const express = require('express');
+const morgan = require('morgan');
 const app = express();
 
+
+morgan.token('post_body', (req, res) => {
+    if (req.method === 'POST')
+        return JSON.stringify(req.body);
+});
+
 app.use(express.json());
+app.use(morgan(':method :url :status :res[content-length] - :response-time ms :post_body'));
 
 
 let persons = [
@@ -65,20 +73,6 @@ app.post('/api/persons', (req, res) => {
     persons = persons.concat(person);
     res.status(201).json(person);
 });
-
-
-
-
-
-
-
-
-
-
-
-
-
-
 
 
 const PORT = 3001;
