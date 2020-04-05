@@ -15,7 +15,7 @@ const App = () => {
   const [notificationMsg, setNotificationMsg] = useState(null);
   const [error, setError] = useState(false);
 
-  const db_url = 'http://localhost:3001/persons';
+  const db_url = '/api/persons';
 
 
   const timeout = () => {
@@ -57,7 +57,7 @@ const App = () => {
           });
       }
     } else {
-      const newPerson = { name: newName, number: newNumber, id: persons.length + 1 };
+      const newPerson = { name: newName, number: newNumber };
       axios
         .post(db_url, newPerson)
         .then(res => {
