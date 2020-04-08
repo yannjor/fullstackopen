@@ -1,4 +1,4 @@
-const mongoose = require('mongoose');
+const mongoose = require("mongoose");
 
 const password = process.argv[2];
 const URL = `mongodb+srv://fullstack:${password}@cluster0-ndwko.mongodb.net/test?retryWrites=true&w=majority`;
@@ -9,31 +9,29 @@ const number = process.argv[4];
 mongoose.connect(URL, { useNewUrlParser: true, useUnifiedTopology: true });
 
 const personSchema = new mongoose.Schema({
-    name: String,
-    number: String
+  name: String,
+  number: String,
 });
 
-const Person = mongoose.model('Person', personSchema);
-
+const Person = mongoose.model("Person", personSchema);
 
 if (!name || !number) {
-    Person.find({}).then(res => {
-        console.log("Phonebook:");
-        res.forEach(person => {
-            console.log(person.name, person.number);
-        });
-        mongoose.connection.close();
+  Person.find({}).then((res) => {
+    console.log("Phonebook:");
+    res.forEach((person) => {
+      console.log(person.name, person.number);
     });
-    return;
+    mongoose.connection.close();
+  });
+  return;
 }
 
-
 const person = new Person({
-    name: name,
-    number: number
+  name: name,
+  number: number,
 });
 
-person.save().then(res => {
-    console.log(`Added ${name} with number ${number} to phonebook`);
-    mongoose.connection.close();
+person.save().then((res) => {
+  console.log(`Added ${name} with number ${number} to phonebook`);
+  mongoose.connection.close();
 });
