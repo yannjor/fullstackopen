@@ -6,8 +6,9 @@ const cors = require("cors");
 const morgan = require("morgan");
 
 morgan.token("post_body", (request, response) => {
-  if (request.method === "POST" || request.method === "PUT")
+  if (request.method === "POST" || request.method === "PUT") {
     return JSON.stringify(request.body);
+  }
 });
 
 app.use(cors());
