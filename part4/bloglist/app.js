@@ -8,7 +8,11 @@ const mongoose = require("mongoose");
 
 const mongoUrl = process.env.MONGODB_URI;
 mongoose
-  .connect(mongoUrl, { useNewUrlParser: true, useUnifiedTopology: true })
+  .connect(mongoUrl, {
+    useNewUrlParser: true,
+    useUnifiedTopology: true,
+    useFindAndModify: false,
+  })
   .then((result) => {
     logger.info("connected to MongoDB");
   })

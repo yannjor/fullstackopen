@@ -21,11 +21,28 @@ blogsRouter.post("/", async (request, response) => {
     return response.status(400).end();
   }
 
-  body.likes = !body.likes ? 0 : body.likes;
+  body.likes = body.likes ? body.likes : 0;
 
   const blog = new Blog(body);
   const savedBlog = await blog.save();
   response.status(201).json(savedBlog.toJSON());
+});
+
+blogsRouter.put("/:id", async (request, response) => {
+  try {
+    const updatedBlog = await Blog.findByIdAndUpdate(
+      request.params.id,
+      request.body
+    );
+    response.json(updatedBlog.toJSON());
+  } catch (err) {
+    response.status(400).end();
+  }
+});
+
+blogsRouter.delete("/:id", async (request, response) => {
+  await Blog.findByIdAndRemove(request.params.id);
+  response.status(204).end();
 });
 
 module.exports = blogsRouter;
