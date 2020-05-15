@@ -9,13 +9,13 @@ usersRouter.get("/", async (request, response) => {
 
 usersRouter.post("/", async (request, response) => {
   const body = request.body;
-  if (!body.username || !body.password) {
-    return response.status(400).json({ error: "username or password missing" });
+  if (!body.password) {
+    return response.status(400).json({ error: "password is required" });
   }
 
-  if (body.username.length < 3 || body.password.length < 3) {
+  if (body.password.length < 3) {
     return response.status(400).json({
-      error: "username and password must be at least 3 characters long",
+      error: "password is shorter than the minimum allowed length",
     });
   }
 

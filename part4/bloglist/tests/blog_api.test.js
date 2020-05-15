@@ -64,7 +64,7 @@ describe("test blogs api", () => {
       expect(body.likes).toEqual(0);
     });
 
-    test("fails with status code 400 if title and url are missing", async () => {
+    test("fails if title and url are missing", async () => {
       const newPost = {
         author: "Martin",
       };
@@ -106,7 +106,22 @@ describe("test users api", () => {
       expect(usernames).toContain(newUser.username);
     });
 
-    test("fails with status code 400 if username not unique", async () => {
+    test("fails if username or password is missing", async () => {
+      const usersAtStart = await helper.usersInDb();
+      const newUser = { username: "pelle" };
+
+      const result = await api
+        .post("/api/users")
+        .send(newUser)
+        .expect(400)
+        .expect("Content-Type", /application\/json/);
+
+      expect(result.body.error).toContain("is required");
+      const usersAtEnd = await helper.usersInDb();
+      expect(usersAtEnd.length).toBe(usersAtStart.length);
+    });
+
+    test("fails if username not unique", async () => {
       const usersAtStart = await helper.usersInDb();
       const newUser = { username: "username", password: "password" };
 
@@ -121,7 +136,7 @@ describe("test users api", () => {
       expect(usersAtEnd.length).toBe(usersAtStart.length);
     });
 
-    test("fails with status code 400 if username or password is too short", async () => {
+    test("fails if username or password is too short", async () => {
       const usersAtStart = await helper.usersInDb();
       const newUser = { username: "aa", password: "bb" };
 
@@ -131,7 +146,9 @@ describe("test users api", () => {
         .expect(400)
         .expect("Content-Type", /application\/json/);
 
-      expect(result.body.error).toContain("must be at least 3 characters");
+      expect(result.body.error).toContain(
+        "is shorter than the minimum allowed length"
+      );
       const usersAtEnd = await helper.usersInDb();
       expect(usersAtEnd.length).toBe(usersAtStart.length);
     });
