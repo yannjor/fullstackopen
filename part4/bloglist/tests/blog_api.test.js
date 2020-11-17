@@ -5,6 +5,7 @@ const helper = require("./test_helper");
 const Blog = require("../models/blog");
 const User = require("../models/user");
 const api = supertest(app);
+const bcrypt = require("bcrypt");
 
 describe("test blogs api", () => {
   beforeEach(async () => {
@@ -13,6 +14,12 @@ describe("test blogs api", () => {
       let blogObject = new Blog(blog);
       await blogObject.save();
     }
+    await User.deleteMany({});
+    const user = new User({
+      username: "username",
+      passwordHash: await bcrypt.hash("password", 10)
+    });
+    await user.save();
   });
 
   describe("fetching all blog posts", () => {
@@ -36,15 +43,20 @@ describe("test blogs api", () => {
 
   describe("adding a new blog post", () => {
     test("post successfully creates new blog post", async () => {
+      const response = await api.post("/api/login").send({
+        username: "username",
+        password: "password"
+      });
+      const token = response.body.token;
       const newPost = {
         title: "New blogpost",
         author: "Kim",
         url: "https://youtube.com",
         likes: 22
       };
-
       await api
         .post("/api/blogs")
+        .set("Authorization", `Bearer ${token}`)
         .send(newPost)
         .expect(201)
         .expect("Content-Type", /application\/json/);
@@ -54,22 +66,48 @@ describe("test blogs api", () => {
     });
 
     test("likes defaults to 0 when missing from request", async () => {
+      const response = await api.post("/api/login").send({
+        username: "username",
+        password: "password"
+      });
+      const token = response.body.token;
       const newPost = {
         title: "Hello",
         author: "Svakar",
         url: "https://facebook.com"
       };
-
-      const { body } = await api.post("/api/blogs").send(newPost).expect(201);
+      const { body } = await api
+        .post("/api/blogs")
+        .set("Authorization", `Bearer ${token}`)
+        .send(newPost)
+        .expect(201);
       expect(body.likes).toEqual(0);
     });
 
     test("fails if title and url are missing", async () => {
+      const response = await api.post("/api/login").send({
+        username: "username",
+        password: "password"
+      });
+      const token = response.body.token;
       const newPost = {
         author: "Martin"
       };
-      await api.post("/api/blogs").send(newPost).expect(400);
+      await api
+        .post("/api/blogs")
+        .set("Authorization", `Bearer ${token}`)
+        .send(newPost)
+        .expect(400);
+      const blogsAtEnd = await helper.blogsInDb();
+      expect(blogsAtEnd).toHaveLength(helper.initialBlogs.length);
+    });
 
+    test("fails if token not provided", async () => {
+      const { body } = await api
+        .post("/api/blogs")
+        .send({ title: "hello", url: "test" })
+        .expect(401);
+      expect(body.error).toContain("auth token missing");
       const blogsAtEnd = await helper.blogsInDb();
       expect(blogsAtEnd).toHaveLength(helper.initialBlogs.length);
     });
