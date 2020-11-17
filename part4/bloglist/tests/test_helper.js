@@ -6,14 +6,14 @@ const initialBlogs = [
     title: "Hello world",
     author: "Pelle",
     url: "https://google.com",
-    likes: 69,
+    likes: 69
   },
   {
     title: "Another blogpost",
     author: "Kalle",
     url: "https://github.com",
-    likes: 420,
-  },
+    likes: 420
+  }
 ];
 
 const usersInDb = async () => {
@@ -29,5 +29,5 @@ const blogsInDb = async () => {
 module.exports = {
   usersInDb,
   initialBlogs,
-  blogsInDb,
+  blogsInDb
 };

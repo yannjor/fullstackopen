@@ -40,7 +40,7 @@ describe("test blogs api", () => {
         title: "New blogpost",
         author: "Kim",
         url: "https://youtube.com",
-        likes: 22,
+        likes: 22
       };
 
       await api
@@ -57,7 +57,7 @@ describe("test blogs api", () => {
       const newPost = {
         title: "Hello",
         author: "Svakar",
-        url: "https://facebook.com",
+        url: "https://facebook.com"
       };
 
       const { body } = await api.post("/api/blogs").send(newPost).expect(201);
@@ -66,7 +66,7 @@ describe("test blogs api", () => {
 
     test("fails if title and url are missing", async () => {
       const newPost = {
-        author: "Martin",
+        author: "Martin"
       };
       await api.post("/api/blogs").send(newPost).expect(400);
 
@@ -90,7 +90,7 @@ describe("test users api", () => {
       const newUser = {
         username: "Pelle98",
         name: "Pelle",
-        password: "hemlig",
+        password: "hemlig"
       };
 
       await api

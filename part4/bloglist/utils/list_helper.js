@@ -31,7 +31,7 @@ const mostBlogs = (blogs) => {
   if (blogs.length === 0) return null;
   return {
     author: _.maxBy(blogs, "author").author,
-    blogs: _.max(_.values(_.countBy(blogs, "author"))),
+    blogs: _.max(_.values(_.countBy(blogs, "author")))
   };
 };
 
@@ -48,5 +48,5 @@ module.exports = {
   totalLikes,
   favoriteBlog,
   mostBlogs,
-  mostLikes,
+  mostLikes
 };
