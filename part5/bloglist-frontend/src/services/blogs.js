@@ -13,11 +13,22 @@ const setToken = (newToken) => {
 };
 
 const post = async (newPost) => {
-  console.log(token);
   const response = await axios.post(baseUrl, newPost, {
     headers: { Authorization: token }
   });
   return response.data;
 };
 
-export default { getAll, setToken, post };
+const update = async (id, blog) => {
+  const response = await axios.put(`${baseUrl}/${id}`, blog);
+  return response.data;
+};
+
+const remove = async (blogId) => {
+  const response = await axios.delete(`${baseUrl}/${blogId}`, {
+    headers: { Authorization: token }
+  });
+  return response.data;
+};
+
+export default { getAll, setToken, post, update, remove };

@@ -11,10 +11,8 @@ const App = () => {
   const [username, setUsername] = useState("");
   const [password, setPassword] = useState("");
   const [user, setUser] = useState(null);
-  const [newPostTitle, setNewPostTitle] = useState("");
-  const [newPostAuthor, setNewPostAuthor] = useState("");
-  const [newPostUrl, setNewPostUrl] = useState("");
   const [notificationMsg, setNotificationMsg] = useState(null);
+  const [blogFormVisible, setBlogFormVisible] = useState(false);
 
   useEffect(() => {
     blogService.getAll().then((blogs) => setBlogs(blogs));
@@ -40,7 +38,6 @@ const App = () => {
       const user = await loginService.login({ username, password });
       setUser(user);
       window.localStorage.setItem("loggedBlogAppUser", JSON.stringify(user));
-      console.log(user);
       blogService.setToken(user.token);
     } catch (exception) {
       setNotificationMsg({
@@ -60,26 +57,45 @@ const App = () => {
     blogService.setToken(null);
   };
 
-  const handlePost = async (event) => {
-    event.preventDefault();
+  const addBlogPost = async (blogPost) => {
     try {
-      const newPost = await blogService.post({
-        title: newPostTitle,
-        author: newPostAuthor,
-        url: newPostUrl
-      });
+      const newPost = await blogService.post(blogPost);
       setBlogs(blogs.concat(newPost));
       setNotificationMsg({
         message: `Blogpost ${newPost.title} successfully added`,
         error: false
       });
       clearNotification(5000);
+      setBlogFormVisible(false);
     } catch (exception) {
+      setNotificationMsg({
+        message: `Failed to add blogpost`,
+        error: true
+      });
+      clearNotification(5000);
       console.error(exception);
     }
-    setNewPostTitle("");
-    setNewPostAuthor("");
-    setNewPostUrl("");
+  };
+
+  const removeBlogPost = async (blogPost) => {
+    try {
+      if (window.confirm(`Remove post ${blogPost.title}?`)) {
+        await blogService.remove(blogPost.id);
+        setBlogs(blogs.filter((blog) => blog !== blogPost));
+        setNotificationMsg({
+          message: "Blogpost successfully removed",
+          error: false
+        });
+        clearNotification(5000);
+      }
+    } catch (exception) {
+      console.error(exception);
+      setNotificationMsg({
+        message: "Failed to remove blogpost",
+        error: true
+      });
+      clearNotification(5000);
+    }
   };
 
   if (!user) {
@@ -97,6 +113,13 @@ const App = () => {
     );
   }
 
+  const hideWhenVisible = { display: blogFormVisible ? "none" : "" };
+  const showWhenVisible = { display: blogFormVisible ? "" : "none" };
+
+  const toggleVisibility = () => {
+    setBlogFormVisible(!blogFormVisible);
+  };
+
   return (
     <div>
       <h2>Blogs</h2>
@@ -105,18 +128,26 @@ const App = () => {
         {user.name} logged in{" "}
         <button onClick={(event) => handleLogout(event)}>Log out</button>
       </p>
-      <BlogForm
-        newPostTitle={newPostTitle}
-        newPostAuthor={newPostAuthor}
-        newPostUrl={newPostUrl}
-        setNewPostTitle={setNewPostTitle}
-        setNewPostAuthor={setNewPostAuthor}
-        setNewPostUrl={setNewPostUrl}
-        handlePost={handlePost}
-      />
-      {blogs.map((blog) => (
-        <Blog key={blog.id} blog={blog} />
-      ))}
+      <button style={hideWhenVisible} onClick={toggleVisibility}>
+        New post
+      </button>
+      <div style={showWhenVisible}>
+        <BlogForm addBlogPost={addBlogPost} />
+      </div>
+      <button style={showWhenVisible} onClick={toggleVisibility}>
+        Cancel
+      </button>
+
+      {blogs
+        .sort((blog) => !blog.likes)
+        .map((blog) => (
+          <Blog
+            key={blog.id}
+            blog={blog}
+            user={user}
+            removeBlogPost={removeBlogPost}
+          />
+        ))}
     </div>
   );
 };
