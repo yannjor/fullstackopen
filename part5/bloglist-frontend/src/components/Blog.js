@@ -1,8 +1,6 @@
 import React, { useState } from "react";
-import blogService from "../services/blogs";
-import PropTypes from "prop-types";
 
-const Blog = ({ blog, user, removeBlogPost }) => {
+const Blog = ({ blog, user, incrementLikes, removeBlogPost }) => {
   const [visible, setVisible] = useState(false);
   const [likes, setLikes] = useState(blog.likes);
 
@@ -14,25 +12,15 @@ const Blog = ({ blog, user, removeBlogPost }) => {
     marginBottom: 5
   };
 
-  const incrementLikes = (event) => {
-    event.preventDefault();
-    try {
-      blogService.update(blog.id, {
-        user: blog.user.id,
-        likes: blog.likes + 1,
-        author: blog.author,
-        title: blog.title,
-        url: blog.url
-      });
-      setLikes(likes + 1);
-    } catch (exception) {
-      console.error(exception);
-    }
-  };
-
   const handleRemove = (event) => {
     event.preventDefault();
     removeBlogPost(blog);
+  };
+
+  const handleUpdate = (event) => {
+    event.preventDefault();
+    incrementLikes(blog);
+    setLikes(likes + 1);
   };
 
   return (
@@ -43,7 +31,10 @@ const Blog = ({ blog, user, removeBlogPost }) => {
           <button onClick={() => setVisible(!visible)}>Hide</button>
           <p>{blog.url}</p>
           <p>
-            Likes: {likes} <button onClick={incrementLikes}>Like</button>
+            Likes: {likes}{" "}
+            <button onClick={handleUpdate} className="likeButton">
+              Like
+            </button>
           </p>
           <p>{blog.author}</p>
           {user.username === blog.user.username && (
@@ -52,18 +43,12 @@ const Blog = ({ blog, user, removeBlogPost }) => {
         </div>
       ) : (
         <div>
-          {blog.title}
+          {blog.title} - {blog.author}
           <button onClick={() => setVisible(!visible)}>Show</button>
         </div>
       )}
     </div>
   );
-};
-
-Blog.propTypes = {
-  blog: PropTypes.object.isRequired,
-  user: PropTypes.object.isRequired,
-  removeBlogPost: PropTypes.func.isRequired
 };
 
 export default Blog;

@@ -98,6 +98,20 @@ const App = () => {
     }
   };
 
+  const incrementLikes = async (blogPost) => {
+    try {
+      blogService.update(blogPost.id, {
+        user: blogPost.user.id,
+        likes: blogPost.likes + 1,
+        author: blogPost.author,
+        title: blogPost.title,
+        url: blogPost.url
+      });
+    } catch (exception) {
+      console.error(exception);
+    }
+  };
+
   if (!user) {
     return (
       <>
@@ -146,6 +160,7 @@ const App = () => {
             blog={blog}
             user={user}
             removeBlogPost={removeBlogPost}
+            incrementLikes={incrementLikes}
           />
         ))}
     </div>
