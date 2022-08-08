@@ -25,7 +25,7 @@ app.use(express.static("build"));
 
 app.get("/info", (request, response) => {
   const date = new Date();
-  Person.countDocuments({}).then(() => {
+  Person.countDocuments({}).then((len) => {
     response.send(
       `<div>
          <p>The phonebook has info for ${len} people</p>
@@ -41,7 +41,7 @@ app.get("/api/persons", (request, response) => {
   });
 });
 
-app.get("/api/persons/:id", (request, response) => {
+app.get("/api/persons/:id", (request, response, next) => {
   Person.findById(request.params.id)
     .then((person) => {
       if (person) {
@@ -53,7 +53,7 @@ app.get("/api/persons/:id", (request, response) => {
     .catch((error) => next(error));
 });
 
-app.delete("/api/persons/:id", (request, response) => {
+app.delete("/api/persons/:id", (request, response, next) => {
   Person.findByIdAndRemove(request.params.id)
     .then((result) => {
       response.status(204).end();
