@@ -58,13 +58,20 @@ const App = () => {
       }
     } else {
       const newPerson = { name: newName, number: newNumber };
-      personService.create(newPerson).then((returnedPerson) => {
-        setPersons(persons.concat(returnedPerson));
-        setNewName("");
-        setNewNumber("");
-        setNotification(`Added ${newName}`);
-        timeout();
-      });
+      personService
+        .create(newPerson)
+        .then((returnedPerson) => {
+          setPersons(persons.concat(returnedPerson));
+          setNewName("");
+          setNewNumber("");
+          setNotification(`Added ${newName}`);
+          timeout();
+        })
+        .catch((error) => {
+          setError(true);
+          setNotification(error.response.data.error);
+          timeout();
+        });
     }
   };
 
