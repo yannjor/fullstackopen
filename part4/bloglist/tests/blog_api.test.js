@@ -1,8 +1,12 @@
 const mongoose = require("mongoose");
 const supertest = require("supertest");
+const bcrypt = require("bcrypt");
+
 const helper = require("./test_helper");
 const app = require("../app");
+
 const Blog = require("../models/blog");
+const User = require("../models/user");
 
 const api = supertest(app);
 
@@ -87,6 +91,81 @@ describe("test blogs api", () => {
       .send({ likes: blogToUpdate.likes + 1 })
       .expect(200);
     expect(body.likes).toBe(blogToUpdate.likes + 1);
+  });
+});
+
+describe("test users api", () => {
+  beforeEach(async () => {
+    await User.deleteMany({});
+    const passwordHash = await bcrypt.hash("hemlig", 10);
+    const user = new User({ username: "pelle", name: "Pelle", passwordHash });
+    await user.save();
+  });
+
+  test("can add new user with fresh username", async () => {
+    const usersAtStart = await helper.usersInDb();
+    const newUser = {
+      username: "kalle98",
+      name: "Kalle",
+      password: "hunter2",
+    };
+
+    await api
+      .post("/api/users")
+      .send(newUser)
+      .expect(201)
+      .expect("Content-Type", /application\/json/);
+
+    const usersAtEnd = await helper.usersInDb();
+    expect(usersAtEnd.length).toBe(usersAtStart.length + 1);
+
+    const usernames = usersAtEnd.map((user) => user.username);
+    expect(usernames).toContain(newUser.username);
+  });
+
+  test("fails to add user if username or password is missing", async () => {
+    const usersAtStart = await helper.usersInDb();
+    const newUser = { username: "putte" };
+    const result = await api
+      .post("/api/users")
+      .send(newUser)
+      .expect(400)
+      .expect("Content-Type", /application\/json/);
+
+    expect(result.body.error).toContain("is required");
+    const usersAtEnd = await helper.usersInDb();
+    expect(usersAtEnd.length).toBe(usersAtStart.length);
+  });
+
+  test("fails to add user if username not unique", async () => {
+    const usersAtStart = await helper.usersInDb();
+    const newUser = { username: "pelle", password: "password" };
+    const result = await api
+      .post("/api/users")
+      .send(newUser)
+      .expect(400)
+      .expect("Content-Type", /application\/json/);
+
+    expect(result.body.error).toBe("username must be unique");
+    const usersAtEnd = await helper.usersInDb();
+    expect(usersAtEnd.length).toBe(usersAtStart.length);
+  });
+
+  test("fails to add user if username or password is too short", async () => {
+    const usersAtStart = await helper.usersInDb();
+    const newUser = { username: "aa", password: "bb" };
+
+    const result = await api
+      .post("/api/users")
+      .send(newUser)
+      .expect(400)
+      .expect("Content-Type", /application\/json/);
+
+    expect(result.body.error).toContain(
+      "is shorter than the minimum allowed length"
+    );
+    const usersAtEnd = await helper.usersInDb();
+    expect(usersAtEnd.length).toBe(usersAtStart.length);
   });
 });
 
