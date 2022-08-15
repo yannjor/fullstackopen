@@ -65,6 +65,8 @@ const App = () => {
     timeout();
   };
 
+  const sortedBlogs = blogs.sort((a, b) => b.likes - a.likes);
+
   return (
     <div>
       <Notification message={notification} error={error} />
@@ -77,10 +79,14 @@ const App = () => {
             {user.name} logged in
             <button onClick={handleLogout}>Log out</button>
           </p>
-          <Togglable buttonLabel="New blog" ref={blogFormRef}>
+          <Togglable
+            buttonLabel="New blog"
+            hideLabel="Cancel"
+            ref={blogFormRef}
+          >
             <BlogForm handleAddBlog={handleAddBlog} />
           </Togglable>
-          {blogs.map((blog) => (
+          {sortedBlogs.map((blog) => (
             <Blog key={blog.id} blog={blog} />
           ))}
         </div>
