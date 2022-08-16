@@ -43,11 +43,11 @@ const App = () => {
       setUser(user);
       blogService.setToken(user.token);
       window.localStorage.setItem("loggedBlogappUser", JSON.stringify(user));
-    } catch (error) {
+    } catch (exception) {
       setNotification("Wrong username or password");
       setError(true);
       timeout();
-      console.error(error);
+      console.error(exception);
     }
   };
 
@@ -57,12 +57,28 @@ const App = () => {
     window.localStorage.clear();
   };
 
-  const handleAddBlog = async (title, author, url) => {
+  const addBlog = async (title, author, url) => {
     blogFormRef.current.toggleVisibility();
     const returnedBlog = await blogService.create({ title, author, url });
     setBlogs(blogs.concat(returnedBlog));
     setNotification(`Added new blog "${title}" by ${author}`);
     timeout();
+  };
+
+  const removeBlog = async (blogPost) => {
+    try {
+      if (window.confirm(`Remove post ${blogPost.title}?`)) {
+        await blogService.remove(blogPost.id);
+        setBlogs(blogs.filter((blog) => blog !== blogPost));
+        setNotification("Blogpost successfully removed");
+      }
+    } catch (exception) {
+      console.error(exception);
+      setNotification("Failed to remove blogpost");
+      setError(true);
+    } finally {
+      timeout();
+    }
   };
 
   const sortedBlogs = blogs.sort((a, b) => b.likes - a.likes);
@@ -84,10 +100,15 @@ const App = () => {
             hideLabel="Cancel"
             ref={blogFormRef}
           >
-            <BlogForm handleAddBlog={handleAddBlog} />
+            <BlogForm handleAddBlog={addBlog} />
           </Togglable>
           {sortedBlogs.map((blog) => (
-            <Blog key={blog.id} blog={blog} />
+            <Blog
+              key={blog.id}
+              blog={blog}
+              user={user}
+              removeBlog={removeBlog}
+            />
           ))}
         </div>
       )}

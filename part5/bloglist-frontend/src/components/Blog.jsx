@@ -1,10 +1,11 @@
 import { useState } from "react";
+import PropTypes from "prop-types";
 
 import Togglable from "./Togglable";
 
 import blogService from "../services/blogs";
 
-const Blog = ({ blog }) => {
+const Blog = ({ blog, user, removeBlog }) => {
   const [likes, setLikes] = useState(blog.likes);
 
   const blogStyle = {
@@ -33,9 +34,25 @@ const Blog = ({ blog }) => {
           Likes: {likes} <button onClick={incrementLikes}>Like</button>
         </p>
         <p>{blog.user.name}</p>
+        {user.username === blog.user.username && (
+          <button
+            onClick={(event) => {
+              event.preventDefault();
+              removeBlog(blog);
+            }}
+          >
+            Remove
+          </button>
+        )}
       </Togglable>
     </div>
   );
+};
+
+Blog.propTypes = {
+  blog: PropTypes.object.isRequired,
+  user: PropTypes.object.isRequired,
+  removeBlogPost: PropTypes.func.isRequired,
 };
 
 export default Blog;
