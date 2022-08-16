@@ -3,9 +3,7 @@ import PropTypes from "prop-types";
 
 import Togglable from "./Togglable";
 
-import blogService from "../services/blogs";
-
-const Blog = ({ blog, user, removeBlog }) => {
+const Blog = ({ blog, user, removeBlog, incrementLikes }) => {
   const [likes, setLikes] = useState(blog.likes);
 
   const blogStyle = {
@@ -16,22 +14,23 @@ const Blog = ({ blog, user, removeBlog }) => {
     marginBottom: 5,
   };
 
-  const incrementLikes = async () => {
-    await blogService.update(blog.id, {
-      ...blog,
-      user: blog.user.id,
-      likes: blog.likes + 1,
-    });
-    setLikes(likes + 1);
-  };
-
   return (
     <div style={blogStyle}>
       {blog.title} {blog.author}
       <Togglable buttonLabel="View" hideLabel="Hide">
         <p>{blog.url}</p>
         <p>
-          Likes: {likes} <button onClick={incrementLikes}>Like</button>
+          Likes: {likes}
+          <button
+            className="likeButton"
+            onClick={(event) => {
+              event.preventDefault();
+              incrementLikes(blog);
+              setLikes(likes + 1);
+            }}
+          >
+            Like
+          </button>
         </p>
         <p>{blog.user.name}</p>
         {user.username === blog.user.username && (
@@ -53,6 +52,7 @@ Blog.propTypes = {
   blog: PropTypes.object.isRequired,
   user: PropTypes.object.isRequired,
   removeBlog: PropTypes.func.isRequired,
+  incrementLikes: PropTypes.func.isRequired,
 };
 
 export default Blog;

@@ -81,6 +81,14 @@ const App = () => {
     }
   };
 
+  const incrementLikes = async (blog) => {
+    await blogService.update(blog.id, {
+      ...blog,
+      user: blog.user.id,
+      likes: blog.likes + 1,
+    });
+  };
+
   const sortedBlogs = blogs.sort((a, b) => b.likes - a.likes);
 
   return (
@@ -108,6 +116,7 @@ const App = () => {
               blog={blog}
               user={user}
               removeBlog={removeBlog}
+              incrementLikes={incrementLikes}
             />
           ))}
         </div>

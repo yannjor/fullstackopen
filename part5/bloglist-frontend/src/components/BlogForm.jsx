@@ -23,6 +23,7 @@ const BlogForm = ({ handleAddBlog }) => {
             type="text"
             value={title}
             name="Title"
+            className="titleInput"
             onChange={({ target }) => setTitle(target.value)}
           />
         </div>
@@ -32,6 +33,7 @@ const BlogForm = ({ handleAddBlog }) => {
             type="text"
             value={author}
             name="Author"
+            className="authorInput"
             onChange={({ target }) => setAuthor(target.value)}
           />
         </div>
@@ -41,6 +43,7 @@ const BlogForm = ({ handleAddBlog }) => {
             type="url"
             value={url}
             name="Url"
+            className="urlInput"
             onChange={({ target }) => setUrl(target.value)}
           />
         </div>
