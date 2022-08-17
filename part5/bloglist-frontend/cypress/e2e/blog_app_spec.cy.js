@@ -37,9 +37,7 @@ describe("Blog app", function () {
 
   describe("When logged in", function () {
     beforeEach(function () {
-      cy.get(".username").type(testUser.username);
-      cy.get(".password").type(testUser.password);
-      cy.get(".login-button").click();
+      cy.login({ username: testUser.username, password: testUser.password });
     });
 
     it("A blog can be created", function () {
@@ -50,6 +48,32 @@ describe("Blog app", function () {
       cy.get(".create-button").click();
       cy.contains('Added new blog "Test blog" by Pelle');
       cy.contains("Test blog Pelle");
+    });
+
+    describe("And some blogs exists", function () {
+      beforeEach(function () {
+        cy.createBlog({ title: "test", author: "Pelle", url: "some url" });
+        cy.createBlog({
+          title: "hello",
+          author: "Kalle",
+          url: "some url",
+          likes: 3,
+        });
+      });
+
+      it("A blog can be liked", function () {
+        cy.contains("test Pelle").as("blog");
+        cy.get("@blog").contains("View").click();
+        cy.get("@blog").contains("Like").click();
+        cy.get("@blog").contains("Likes: 1");
+      });
+
+      it("A blog can be deleted by its creator", function () {
+        cy.contains("test Pelle").as("blog");
+        cy.get("@blog").contains("View").click();
+        cy.get("@blog").contains("Remove").click();
+        cy.contains("Blogpost successfully removed");
+      });
     });
   });
 });
