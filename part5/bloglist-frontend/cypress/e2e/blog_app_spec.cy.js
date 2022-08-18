@@ -59,6 +59,18 @@ describe("Blog app", function () {
           url: "some url",
           likes: 3,
         });
+        cy.createBlog({
+          title: "whatsup",
+          author: "Bob",
+          url: "some url",
+          likes: 2,
+        });
+        cy.createBlog({
+          title: "famous blog",
+          author: "Bertil",
+          url: "some url",
+          likes: 55,
+        });
       });
 
       it("A blog can be liked", function () {
@@ -73,6 +85,13 @@ describe("Blog app", function () {
         cy.get("@blog").contains("View").click();
         cy.get("@blog").contains("Remove").click();
         cy.contains("Blogpost successfully removed");
+      });
+
+      it("Blogs are sorted by likes", function () {
+        cy.get(".blog").eq(0).should("contain", "famous blog");
+        cy.get(".blog").eq(1).should("contain", "hello");
+        cy.get(".blog").eq(2).should("contain", "whatsup");
+        cy.get(".blog").eq(3).should("contain", "test");
       });
     });
   });
