@@ -1,5 +1,5 @@
 import { useState, useEffect, useRef } from "react";
-import { useDispatch } from "react-redux";
+import { useDispatch, useSelector } from "react-redux";
 
 import Blog from "./components/Blog";
 import LoginForm from "./components/LoginForm";
@@ -11,15 +11,19 @@ import blogService from "./services/blogs";
 import loginService from "./services/login";
 
 import { setNotification } from "./reducers/notificationReducer";
+import { initializeBlogs, createBlog } from "./reducers/blogReducer";
 
 const App = () => {
-  const [blogs, setBlogs] = useState([]);
+  const blogs = useSelector((state) =>
+    [...state.blogs].sort((a, b) => b.likes - a.likes)
+  );
+
   const [user, setUser] = useState(null);
   const dispatch = useDispatch();
 
   useEffect(() => {
-    blogService.getAll().then((blogs) => setBlogs(blogs));
-  }, []);
+    dispatch(initializeBlogs());
+  }, [dispatch]);
 
   useEffect(() => {
     const loggedUserJSON = window.localStorage.getItem("loggedBlogappUser");
@@ -52,33 +56,9 @@ const App = () => {
 
   const addBlog = async (title, author, url) => {
     blogFormRef.current.toggleVisibility();
-    const returnedBlog = await blogService.create({ title, author, url });
-    setBlogs(blogs.concat(returnedBlog));
+    dispatch(createBlog({ title, author, url, user }));
     dispatch(setNotification(`Added new blog "${title}" by ${author}`));
   };
-
-  const removeBlog = async (blogPost) => {
-    try {
-      if (window.confirm(`Remove post ${blogPost.title}?`)) {
-        await blogService.remove(blogPost.id);
-        setBlogs(blogs.filter((blog) => blog !== blogPost));
-        dispatch(setNotification("Blogpost successfully removed"));
-      }
-    } catch (exception) {
-      console.error(exception);
-      dispatch(setNotification("Failed to remove blogpost", true));
-    }
-  };
-
-  const incrementLikes = async (blog) => {
-    await blogService.update(blog.id, {
-      ...blog,
-      user: blog.user.id,
-      likes: blog.likes + 1,
-    });
-  };
-
-  const sortedBlogs = blogs.sort((a, b) => b.likes - a.likes);
 
   return (
     <div>
@@ -99,14 +79,8 @@ const App = () => {
           >
             <BlogForm handleAddBlog={addBlog} />
           </Togglable>
-          {sortedBlogs.map((blog) => (
-            <Blog
-              key={blog.id}
-              blog={blog}
-              user={user}
-              removeBlog={removeBlog}
-              incrementLikes={incrementLikes}
-            />
+          {blogs.map((blog) => (
+            <Blog key={blog.id} blog={blog} user={user} />
           ))}
         </div>
       )}

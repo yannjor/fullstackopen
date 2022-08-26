@@ -1,10 +1,13 @@
-import { useState } from "react";
+import { useDispatch } from "react-redux";
 import PropTypes from "prop-types";
 
 import Togglable from "./Togglable";
 
-const Blog = ({ blog, user, removeBlog, incrementLikes }) => {
-  const [likes, setLikes] = useState(blog.likes);
+import { likeBlog, removeBlog } from "../reducers/blogReducer";
+import { setNotification } from "../reducers/notificationReducer";
+
+const Blog = ({ blog, user }) => {
+  const dispatch = useDispatch();
 
   const blogStyle = {
     paddingTop: 10,
@@ -20,13 +23,12 @@ const Blog = ({ blog, user, removeBlog, incrementLikes }) => {
       <Togglable buttonLabel="View" hideLabel="Hide">
         <p>{blog.url}</p>
         <p>
-          Likes: {likes}
+          Likes: {blog.likes}
           <button
             className="likeButton"
             onClick={(event) => {
               event.preventDefault();
-              incrementLikes(blog);
-              setLikes(likes + 1);
+              dispatch(likeBlog(blog));
             }}
           >
             Like
@@ -37,7 +39,10 @@ const Blog = ({ blog, user, removeBlog, incrementLikes }) => {
           <button
             onClick={(event) => {
               event.preventDefault();
-              removeBlog(blog);
+              if (window.confirm(`Remove post ${blog.title}?`)) {
+                dispatch(removeBlog(blog));
+                dispatch(setNotification("Blogpost successfully removed"));
+              }
             }}
           >
             Remove
@@ -51,8 +56,6 @@ const Blog = ({ blog, user, removeBlog, incrementLikes }) => {
 Blog.propTypes = {
   blog: PropTypes.object.isRequired,
   user: PropTypes.object.isRequired,
-  removeBlog: PropTypes.func.isRequired,
-  incrementLikes: PropTypes.func.isRequired,
 };
 
 export default Blog;
