@@ -1,11 +1,13 @@
 import { useEffect, useRef } from "react";
 import { useDispatch, useSelector } from "react-redux";
+import { Routes, Route } from "react-router-dom";
 
 import Blog from "./components/Blog";
 import LoginForm from "./components/LoginForm";
 import BlogForm from "./components/BlogForm";
 import Notification from "./components/Notification";
 import Togglable from "./components/Togglable";
+import Users from "./components/Users";
 
 import { setNotification } from "./reducers/notificationReducer";
 import { initializeBlogs, createBlog } from "./reducers/blogReducer";
@@ -45,16 +47,26 @@ const App = () => {
             {user.name} logged in
             <button onClick={() => dispatch(logOutUser())}>Log out</button>
           </p>
-          <Togglable
-            buttonLabel="New blog"
-            hideLabel="Cancel"
-            ref={blogFormRef}
-          >
-            <BlogForm handleAddBlog={addBlog} />
-          </Togglable>
-          {blogs.map((blog) => (
-            <Blog key={blog.id} blog={blog} user={user} />
-          ))}
+          <Routes>
+            <Route
+              path="/"
+              element={
+                <div>
+                  <Togglable
+                    buttonLabel="New blog"
+                    hideLabel="Cancel"
+                    ref={blogFormRef}
+                  >
+                    <BlogForm handleAddBlog={addBlog} />
+                  </Togglable>
+                  {blogs.map((blog) => (
+                    <Blog key={blog.id} blog={blog} user={user} />
+                  ))}
+                </div>
+              }
+            />
+            <Route path="/users" element={<Users />} />
+          </Routes>
         </div>
       )}
     </div>
