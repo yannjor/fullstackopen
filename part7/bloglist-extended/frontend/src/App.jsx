@@ -1,4 +1,4 @@
-import { useState, useEffect, useRef } from "react";
+import { useEffect, useRef } from "react";
 import { useDispatch, useSelector } from "react-redux";
 
 import Blog from "./components/Blog";
@@ -7,52 +7,25 @@ import BlogForm from "./components/BlogForm";
 import Notification from "./components/Notification";
 import Togglable from "./components/Togglable";
 
-import blogService from "./services/blogs";
-import loginService from "./services/login";
-
 import { setNotification } from "./reducers/notificationReducer";
 import { initializeBlogs, createBlog } from "./reducers/blogReducer";
+import { initializeUser, logOutUser } from "./reducers/userReducer";
 
 const App = () => {
   const blogs = useSelector((state) =>
     [...state.blogs].sort((a, b) => b.likes - a.likes)
   );
 
-  const [user, setUser] = useState(null);
+  const user = useSelector((state) => state.user);
+
   const dispatch = useDispatch();
 
   useEffect(() => {
+    dispatch(initializeUser());
     dispatch(initializeBlogs());
   }, [dispatch]);
 
-  useEffect(() => {
-    const loggedUserJSON = window.localStorage.getItem("loggedBlogappUser");
-    if (loggedUserJSON) {
-      const user = JSON.parse(loggedUserJSON);
-      setUser(user);
-      blogService.setToken(user.token);
-    }
-  }, []);
-
   const blogFormRef = useRef();
-
-  const handleLogin = async (username, password) => {
-    try {
-      const user = await loginService.login({ username, password });
-      setUser(user);
-      blogService.setToken(user.token);
-      window.localStorage.setItem("loggedBlogappUser", JSON.stringify(user));
-    } catch (exception) {
-      dispatch(setNotification("Wrong username or password", true));
-      console.error(exception);
-    }
-  };
-
-  const handleLogout = (event) => {
-    event.preventDefault();
-    setUser(null);
-    window.localStorage.clear();
-  };
 
   const addBlog = async (title, author, url) => {
     blogFormRef.current.toggleVisibility();
@@ -64,13 +37,13 @@ const App = () => {
     <div>
       <Notification />
       {!user ? (
-        <LoginForm handleLogin={handleLogin} />
+        <LoginForm />
       ) : (
         <div>
           <h2>Blogs</h2>
           <p>
             {user.name} logged in
-            <button onClick={handleLogout}>Log out</button>
+            <button onClick={() => dispatch(logOutUser())}>Log out</button>
           </p>
           <Togglable
             buttonLabel="New blog"
