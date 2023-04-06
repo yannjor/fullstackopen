@@ -1,4 +1,4 @@
-function calculateBmi(heightCm: number, massKg: number): string {
+export function calculateBmi(heightCm: number, massKg: number): string {
   const bmi = massKg / Math.pow(heightCm / 100, 2);
   if (bmi < 18.5) {
     return "Underweight";

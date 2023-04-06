@@ -25,7 +25,10 @@ function calculateRating(average: number, target: number): number {
   }
 }
 
-function calculateExercises(exerciseHours: number[], target: number): Result {
+export function calculateExercises(
+  exerciseHours: number[],
+  target: number
+): Result {
   const periodLength = exerciseHours.length;
   const average = exerciseHours.reduce((a, b) => a + b) / periodLength;
   const rating = calculateRating(average, target);
