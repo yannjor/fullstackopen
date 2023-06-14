@@ -1,5 +1,5 @@
 import { useState, useEffect } from "react";
-import { Route, Link, Routes, useMatch } from "react-router-dom";
+import { Route, Link, Routes } from "react-router-dom";
 import { Button, Divider, Container, Typography } from "@mui/material";
 
 import { Patient } from "./types";
@@ -19,9 +19,6 @@ const App = () => {
     void fetchPatientList();
   }, []);
 
-  const match = useMatch("/patients/:id");
-  const patient = match ? patients.find((p) => p.id === match.params.id) : null;
-
   return (
     <div className="App">
       <Container>
@@ -33,10 +30,7 @@ const App = () => {
         </Button>
         <Divider hidden />
         <Routes>
-          <Route
-            path="patients/:id"
-            element={<PatientView patient={patient as Patient} />}
-          />
+          <Route path="patients/:id" element={<PatientView />} />
           <Route
             path="/"
             element={

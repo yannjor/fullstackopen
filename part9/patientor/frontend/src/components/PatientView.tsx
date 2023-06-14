@@ -1,19 +1,18 @@
 import { useState, useEffect } from "react";
 
-import { Patient } from "../types";
+import { Diagnosis, Patient } from "../types";
 import patientService from "../services/patients";
+import diagnosesService from "../services/diagnoses";
 import { useParams } from "react-router-dom";
 
-interface PatientViewProps {
-  patient: Patient;
-}
-
-export const PatientView = (props: PatientViewProps) => {
+export const PatientView = () => {
   const { id } = useParams();
-  const [patient, setPatient] = useState<Patient>(props.patient);
+  const [patient, setPatient] = useState<Patient>();
+  const [diagnoses, setDiagnoses] = useState<Diagnosis[]>([]);
 
   useEffect(() => {
     id && patientService.getById(id).then((p) => setPatient(p));
+    diagnosesService.getAll().then((d) => setDiagnoses(d));
   }, [id]);
 
   if (patient) {
@@ -26,14 +25,21 @@ export const PatientView = (props: PatientViewProps) => {
         <p>occuption: {patient.occupation}</p>
 
         <h4>Entries</h4>
-        {patient.entries.map((e) => (
-          <div key={e.id}>
+        {patient.entries.map((entry) => (
+          <div key={entry.id}>
             <p>
-              {e.date} {e.description}
+              {entry.date} {entry.description}
             </p>
             <ul>
-              {e.diagnosisCodes &&
-                e.diagnosisCodes.map((c) => <li key={c}>{c}</li>)}
+              {entry.diagnosisCodes &&
+                entry.diagnosisCodes.map((code) => {
+                  const diagnosis = diagnoses.find((d) => d.code === code);
+                  return (
+                    <li key={code}>
+                      {code} {diagnosis?.name}
+                    </li>
+                  );
+                })}
             </ul>
           </div>
         ))}
